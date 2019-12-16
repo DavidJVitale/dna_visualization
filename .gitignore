@@ -7,6 +7,7 @@ node_modules/
 
 # Compiled javascript
 dna_visualization/static/
+js/package-lock.json
 
 # OS X
 .DS_Store
