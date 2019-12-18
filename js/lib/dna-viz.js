@@ -5,6 +5,8 @@ var cssStr = `
 div.seq {
     overflow: auto;
     white-space: nowrap;
+    user-select: none;
+    -moz-user-select: none;
 }
 div.nucleotide {
     display: inline-block;
@@ -12,6 +14,7 @@ div.nucleotide {
     height: auto;
     color: white;
     text-decoration: none;
+    margin-right: -4px;
 }
 div.nucleotide:hover {
     background-color: #777;
@@ -46,11 +49,11 @@ const downGPts = "10,10 40,10 40,60 30,60 30,50 20,50, 20,60 10,60";
 var DNAVizView = widgets.DOMWidgetView.extend({
     render: function() {
         this.el.className = "dna-viz-view";
-        this.seqChanged();
-        this.model.on('change:_seq', this.seqChanged, this);
+        this.drawSequenceEl();
+        this.model.on('change:_seq', this.drawSequenceEl, this);
     },
 
-    _getNucleotideDivStr: function(char_) {
+    _getNucleotideDiv: function(char_) {
         var color = "black";
         var points = downAPts;
         if(char_ === "A"){
@@ -66,27 +69,52 @@ var DNAVizView = widgets.DOMWidgetView.extend({
             color = "green";
             points = downGPts;}
 
-        return `
-            <div class="nucleotide">
+        var nuclDiv = document.createElement("div");
+        nuclDiv.classList.add("nucleotide");
+        nuclDiv.innerHTML = `
             <svg><g>
+                <rect fill="black" width="50" height="10"/>
                 <polygon points="` + points + `" fill="` + color + `"/>
                 <text x="13" y="40" font-family="Verdana" font-size="32" fill="white">` + char_ + `</text>
             </g></svg>
-            </div>`
+            `;
+        return nuclDiv;
     },
 
-    seqChanged: function() {
-        var html = '<style>' + cssStr + '</style>'
-        html += '<div class="seq">'
-        var seq = this.model.get('_seq');
-        for(var i=0; i< seq.length; i++){
-            var char_ = seq[i];
-            html += this._getNucleotideDivStr(char_);
+    drawSequenceEl: function() {
+        var styleDiv = document.createElement("style");
+        styleDiv.innerHTML = cssStr;
+        this.el.appendChild(styleDiv);
+
+        var seqDiv = document.createElement("div");
+        seqDiv.classList.add("seq");
+        var seqData = this.model.get('_seq');
+        for(var i=0; i< seqData.length; i++){
+            var char_ = seqData[i];
+            var nuclDiv = this._getNucleotideDiv(char_);
+            nuclDiv.id = i;
+            this._setUpNuclDivMouseEvents(nuclDiv);
+            seqDiv.appendChild(nuclDiv);
         }
-        html += '</div>'
-        this.el.innerHTML = html;
+
+        this.el.appendChild(seqDiv);
+    },
+
+    _setUpNuclDivMouseEvents: function(nuclDiv) {
+        nuclDiv.onmousedown = (evt) => {
+            evt.target.style.backgroundColor = "LightBlue";};
+        nuclDiv.onmouseover = (evt) => {
+            if(evt.buttons === 1){
+                evt.target.style.backgroundColor = "LightBlue";
+            }
+        };
+        nuclDiv.onmouseout = (evt) => {};
+        nuclDiv.onmouseup = (evt) => {
+            evt.target.style.backgroundColor = "LightBlue";};
     }
 });
+
+
 
 
 module.exports = {
