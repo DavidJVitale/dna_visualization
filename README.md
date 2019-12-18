@@ -3,6 +3,8 @@ dna-visualization
 
 Proof of concept of a jupyter widget that allows you to visualize DNA sequences and . Works well for performing basic sequence analysis when integrated with libraries like Biopython.
 
+![](./examples/inaction1.gif)
+
 Installation
 ------------
 
